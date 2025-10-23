@@ -1,34 +1,39 @@
+import { startServer } from "./server";
+import { DatabasePg, DatabasePgConfig } from "./backend-resources/models/DatabasePg";
 import "colors";
-import { initializeDatabase, closeDatabaseConnection } from "./modules/database/db-init";
-import { createServer, startServer } from "./server";
+import dotenv from "dotenv";
 
-const PORT: number = parseInt(process.env.PORT || "3000");
+dotenv.config();
 
 async function startApplication(): Promise<void> {
   try {
-    // 1. Inicializar base de datos
-    await initializeDatabase();
+    const PORT: number = parseInt(process.env.PORT!);
 
-    // 2. Crear servidor Express
-    const app = createServer();
+    const config: DatabasePgConfig = {
+      host: process.env.DBHOST!,
+      port: Number(process.env.DBPORT!),
+      user: process.env.DBUSER!,
+      password: process.env.DBPASS!,
+      database: process.env.DBNAME!,
+    };
 
-    // 3. Iniciar servidor
-    startServer(app, PORT);
+    await DatabasePg.connect(config);
+
+    await DatabasePg.testConnection();
+
+    startServer(PORT);
   } catch (error) {
     console.error("Error al iniciar la aplicación:".red, error);
     process.exit(1);
   }
 }
 
-async function gracefulShutdown(): Promise<void> {
-  console.log("Cerrando aplicación...".yellow);
-  await closeDatabaseConnection();
+async function shutDownApplication(): Promise<void> {
+  await DatabasePg.close();
   process.exit(0);
 }
 
-// Manejo de señales de cierre
-process.on("SIGINT", gracefulShutdown);
-process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", shutDownApplication);
+process.on("SIGTERM", shutDownApplication);
 
-// Iniciar la aplicación
 startApplication();

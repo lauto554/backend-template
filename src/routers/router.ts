@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
-import { ResponseModel } from "./backend-resources/models/Response";
-import { Database } from "./modules/database/db-init";
 import "colors";
+import { ResponseModel } from "../backend-resources/models/ResponseModel";
+import { DatabasePg } from "../backend-resources/models/DatabasePg";
 
 const router = Router();
 
@@ -27,10 +27,10 @@ router.get("/health", (req: Request, res: Response) => {
 // Test de base de datos
 router.get("/db-test", async (req: Request, res: Response) => {
   try {
-    const result = await Database.query("SELECT version() as version, current_timestamp as now");
+    const result = await DatabasePg.query("SELECT version() as version, current_timestamp as now");
 
     const response = ResponseModel.create("success", 200, "db-test OK", {
-      result: result[0],
+      result: result.rows[0],
     });
 
     res.json(response);
