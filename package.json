@@ -4,11 +4,12 @@
   "description": "Express app with TypeScript",
   "main": "dist/index.js",
   "scripts": {
-    "submodule": "git submodule update --init --recursive",
+    "init": "git submodule update --init --recursive && npm install",
+    "submodule": "git submodule update --remote --recursive",
+    "typecheck": "tsc --noEmit",
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "clean": "rimraf dist"
+    "start": "node dist/index.js"
   },
   "keywords": [
     "express",
@@ -40,4 +41,5 @@
     "typescript": "5.1.6"
   }
 }
+
 
